@@ -25,7 +25,7 @@ public class Person implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String fName, lName, phone;
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date created;
@@ -81,11 +81,11 @@ public class Person implements Serializable {
             address.addPerson(this);
     }
     
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -2,6 +2,7 @@ package rest;
 
 import entities.Address;
 import entities.Person;
+import entities.dto.PersonDTO;
 import utils.EMF_Creator;
 import io.restassured.RestAssured;
 import static io.restassured.RestAssured.given;
@@ -19,6 +20,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -124,7 +126,7 @@ public class PersonRessourceTest {
 
     @Test
     public void testGetPersonById() throws Exception {
-        int id = p1.getId();
+        Long id = p1.getId();
         given()
                 .contentType("application/json")
                 .get("/person/"+id).then()
@@ -156,12 +158,14 @@ public class PersonRessourceTest {
     @Test
     public void testEditPerson() throws Exception {
 
-        given()
+        PersonDTO pdto = given()
             .contentType(ContentType.JSON)
             .request().body("{\"fName\":\"Kalle\",\"lName\": \"Kistrup\",\"phone\": \"40404054\"}")
             .put("/person/"+p1.getId())
             .then().statusCode(200)
-            .body("fName", is("Kalle"));
+            .body("fName", is("Kalle"))
+            .extract().response().as(PersonDTO.class);
+        assertTrue(pdto.getId() == p1.getId());
     }
     @Test
     public void testDeletePerson() throws Exception {

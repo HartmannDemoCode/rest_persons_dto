@@ -23,9 +23,9 @@ import exceptions.PersonNotFoundException;
 
         PersonDTO addPerson(PersonDTO pdto);
 
-        PersonDTO deletePerson(int id) throws PersonNotFoundException;
+        PersonDTO deletePerson(Long id) throws PersonNotFoundException;
 
-        PersonDTO getPerson(int id) throws PersonNotFoundException;
+        PersonDTO getPerson(Long id) throws PersonNotFoundException;
 
         PersonsDTO getAllPersons();
 

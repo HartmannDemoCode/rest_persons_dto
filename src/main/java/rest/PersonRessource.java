@@ -46,7 +46,7 @@ public class PersonRessource {
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getPerson(@PathParam("id") int id) throws PersonNotFoundException {
+    public Response getPerson(@PathParam("id") Long id) throws PersonNotFoundException {
         System.out.println("ID:" + id);
         System.out.println(FACADE.getPerson(id));
         return Response.ok(GSON.toJson(FACADE.getPerson(id))).build();
@@ -94,7 +94,7 @@ public class PersonRessource {
     @DELETE
     @Path("/{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response deletePerson(@PathParam("id") int id) throws PersonNotFoundException {
+    public Response deletePerson(@PathParam("id") Long id) throws PersonNotFoundException {
 
         PersonDTO pdto = FACADE.deletePerson(id);
         return Response.ok(GSON.toJson(pdto)).build();

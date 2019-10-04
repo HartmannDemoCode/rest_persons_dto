@@ -68,7 +68,7 @@ public class PersonFacade implements IPersonFacade {
     }
 
     @Override
-    public PersonDTO deletePerson(int id) throws PersonNotFoundException {
+    public PersonDTO deletePerson(Long id) throws PersonNotFoundException {
         EntityManager em = getEntityManager();
         Person p = em.find(Person.class, id);
         if (p == null) {
@@ -82,7 +82,7 @@ public class PersonFacade implements IPersonFacade {
     }
 
     @Override
-    public PersonDTO getPerson(int id) throws PersonNotFoundException {
+    public PersonDTO getPerson(Long id) throws PersonNotFoundException {
         EntityManager em = getEntityManager();
         Person p = em.find(Person.class, id);
         if (p == null) {
@@ -106,12 +106,16 @@ public class PersonFacade implements IPersonFacade {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
         Person p = new Person(pdto.getfName(), pdto.getlName(),pdto.getPhone());
+        p.setId(pdto.getId());
+        Address address = null;
         try {
-            Address address = findAddress(pdto.getStreet(), pdto.getZip(), pdto.getCity());
-            Address mergedAddress = em.merge(address);
-            p.setAddress(mergedAddress);
+            address = findAddress(pdto.getStreet(), pdto.getZip(), pdto.getCity());
+            address = em.merge(address);
+            p.setAddress(address);
         } catch (AddressNotFoundException ex) {
-            System.out.println("Address does not exist");
+            address = new Address(pdto.getStreet(), pdto.getZip(), pdto.getCity());
+            em.persist(address);
+            p.setAddress(address);
         }
         try {
             p = em.merge(p);
