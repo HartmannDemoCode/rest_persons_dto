@@ -4,15 +4,16 @@ import entities.Address;
 import entities.Person;
 import entities.dto.PersonDTO;
 import entities.dto.PersonsDTO;
+import exceptions.AddressNotFoundException;
 import utils.EMF_Creator;
 import exceptions.PersonNotFoundException;
-import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,8 +28,8 @@ public class PersonFacadeTest {
 
     private static EntityManagerFactory emf;
     private static IPersonFacade facade;
-    private Person p1;
-    private Person p2;
+    private Person p1, p2;
+    private Address a1, a2;
 
     public PersonFacadeTest() {
     }
@@ -69,8 +70,11 @@ public class PersonFacadeTest {
         try {
             em.getTransaction().begin();
             em.createNamedQuery("Person.deleteAllRows").executeUpdate();
-            p1 = new Person("Henning", "Bonnetsen", "536436", new Address("Rolighedsvej 5", "2100", "Cph E"));
-            p2 = new Person("Helle", "Harsk", "213243", new Address("Rolighedsvej 6", "2100", "Cph E"));
+            em.createNamedQuery("Address.deleteAllRows").executeUpdate();
+            a1 = new Address("Rolighedsvej 5", "2100", "Cph E");
+            a2 = new Address("Rolighedsvej 6", "2100", "Cph E");
+            p1 = new Person("Henning", "Bonnetsen", "536436", a1);
+            p2 = new Person("Helle", "Harsk", "213243", a2);
             em.persist(p1);
             em.persist(p2);
 
@@ -103,10 +107,11 @@ public class PersonFacadeTest {
         try {
             PersonDTO p = facade.deletePerson(p1.getId());
             assertThat(p, Matchers.hasProperty("id"));
+            assertThrows(AddressNotFoundException.class,()->{facade.findAddress("Rolighedsvej 5", "2100", "Cph E");});
         } catch (PersonNotFoundException ex) {
             ex.printStackTrace();
         }
-
+        
     }
 
     @Test

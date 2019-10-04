@@ -30,6 +30,9 @@ import exceptions.PersonNotFoundException;
         PersonsDTO getAllPersons();
 
         PersonDTO editPerson(PersonDTO p) throws PersonNotFoundException;
+        
+        Address findAddress(String street, String zip, String city) throws AddressNotFoundException;
+
                 
         long count();
     }

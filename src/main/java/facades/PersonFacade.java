@@ -74,7 +74,11 @@ public class PersonFacade implements IPersonFacade {
         if (p == null) {
             throw new PersonNotFoundException("Could not delete, provided id does not exist");
         }
+        Address a = p.getAddress();
         em.getTransaction().begin();
+        if(livesAloneAtAddress(a)){
+            em.remove(a);
+        }
         em.remove(p);
         em.getTransaction().commit();
         em.close();
@@ -169,4 +173,7 @@ public class PersonFacade implements IPersonFacade {
     }
 
 
+    private boolean livesAloneAtAddress(Address a){
+        return a != null && a.getPersons().size() == 1;
+    }
 }
