@@ -5,6 +5,7 @@
  */
 package entities.dto;
 
+import entities.Address;
 import entities.Person;
 
 /**
@@ -12,24 +13,31 @@ import entities.Person;
  * @author tha
  */
 public class PersonDTO {
+
     private long id;
     private String fName;
     private String lName;
     private String phone;
+    private String street;
+    private String zip;
+    private String city;
+
     public PersonDTO(Person p) {
         this.fName = p.getFirstName();
         this.lName = p.getLastName();
         this.phone = p.getPhone();
+        
         this.id = p.getId();
+        Address a = p.getAddress();
+        if (a != null) {
+            this.street = a.getStreet();
+            this.zip = a.getZip();
+            this.city = a.getCity();
+        }
     }
     
-    public PersonDTO(String fn,String ln, String phone) {
-        this.fName = fn;
-        this.lName = ln;
-        this.phone = phone;        
-    } 
-    
-    public PersonDTO() {}
+    public PersonDTO() {
+    }
 
     public long getId() {
         return id;
@@ -63,11 +71,34 @@ public class PersonDTO {
         this.phone = phone;
     }
 
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getZip() {
+        return zip;
+    }
+
+    public void setZip(String zip) {
+        this.zip = zip;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+    
+
     @Override
     public String toString() {
         return "PersonDTO{" + "id=" + id + ", fName=" + fName + ", lName=" + lName + ", phone=" + phone + '}';
     }
-    
-}
-        
 
+}

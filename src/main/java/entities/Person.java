@@ -2,10 +2,14 @@ package entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
@@ -27,16 +31,54 @@ public class Person implements Serializable {
     private Date created;
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date lastEdited;
+    
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "address_id")
+    private Address address;
+
+    public Person(String firstName, String lastName, String phone, Address a) {
+        this.fName = firstName;
+        this.lName = lastName;
+        this.phone = phone;
+        this.address = a;
+        a.addPerson(this);
+        this.created = new Date();
+        this.lastEdited = new Date();
+    }
 
     public Person(String firstName, String lastName, String phone) {
         this.fName = firstName;
         this.lName = lastName;
         this.phone = phone;
-        this.created = new Date();
-        this.lastEdited = new Date();
+    }
+    
+    public Person() {
     }
 
-    public Person() {
+    public String getfName() {
+        return fName;
+    }
+
+    public void setfName(String fName) {
+        this.fName = fName;
+    }
+
+    public String getlName() {
+        return lName;
+    }
+
+    public void setlName(String lName) {
+        this.lName = lName;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+        if(!address.getPersons().contains(this))
+            address.addPerson(this);
     }
     
     public Integer getId() {

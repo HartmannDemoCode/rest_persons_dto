@@ -1,10 +1,11 @@
 package facades;
 
+import entities.Address;
 import entities.Person;
-import facades.IPersonFacade;
+import entities.dto.PersonDTO;
+import entities.dto.PersonsDTO;
 import utils.EMF_Creator;
 import exceptions.PersonNotFoundException;
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -51,8 +52,8 @@ public class PersonFacadeTest {
      */
     @BeforeAll
     public static void setUpClassV2() {
-       emf = EMF_Creator.createEntityManagerFactory(DbSelector.TEST,Strategy.DROP_AND_CREATE);
-       facade = PersonFacade.getPersonFacade(emf);
+        emf = EMF_Creator.createEntityManagerFactory(DbSelector.TEST, Strategy.DROP_AND_CREATE);
+        facade = PersonFacade.getPersonFacade(emf);
     }
 
     @AfterAll
@@ -68,8 +69,8 @@ public class PersonFacadeTest {
         try {
             em.getTransaction().begin();
             em.createNamedQuery("Person.deleteAllRows").executeUpdate();
-            p1 = new Person("Henning", "Bonnetsen","536436");
-            p2 = new Person("Helle", "Harsk","213243");
+            p1 = new Person("Henning", "Bonnetsen", "536436", new Address("Rolighedsvej 5", "2100", "Cph E"));
+            p2 = new Person("Helle", "Harsk", "213243", new Address("Rolighedsvej 6", "2100", "Cph E"));
             em.persist(p1);
             em.persist(p2);
 
@@ -89,53 +90,56 @@ public class PersonFacadeTest {
     public void testCount() {
         assertEquals(2, facade.count(), "Expects two rows in the database");
     }
-    
+
     @Test
-    public void addPersonTest(){
-        Person p = facade.addPerson("Janni",  "Spice",  "123456");
-        assertTrue(p.getId() != null);
+    public void addPersonTest() {
+        Address address = new Address("Rolighedsvej 3", "2100", "Copenhagen East");
+        PersonDTO p = facade.addPerson("Janni", "Spice", "123456", "Rolighedsvej 3", "2100", "Copenhagen East");
+        assertTrue(p.getId() != 0);
     }
-        
-        @Test
-        public void deletePersonTest(){
+
+    @Test
+    public void deletePersonTest() {
         try {
-            Person p = facade.deletePerson(p1.getId());
+            PersonDTO p = facade.deletePerson(p1.getId());
             assertThat(p, Matchers.hasProperty("id"));
         } catch (PersonNotFoundException ex) {
             ex.printStackTrace();
         }
 
-        }
+    }
 
-        @Test
-        public void getPersonTest(){
+    @Test
+    public void getPersonTest() {
         try {
-            Person p = facade.getPerson(p1.getId());
-            assertTrue(p.getFirstName().equals("Henning"));
+            PersonDTO p = facade.getPerson(p1.getId());
+            assertTrue(p.getfName().equals("Henning"));
         } catch (PersonNotFoundException ex) {
             ex.printStackTrace();
         }
-        }
+    }
 //        
 //
-        @Test
-        public void getAllPersonsTest(){
-            List<Person> persons = facade.getAllPersons();
-            assertTrue(persons.size() == 2);
-        }
+
+    @Test
+    public void getAllPersonsTest() {
+        PersonsDTO persons = facade.getAllPersons();
+        assertTrue(persons.getAll().size() == 2);
+    }
 //        
 //
-        @Test
-        public void editPersonTest(){
+
+    @Test
+    public void editPersonTest() {
         try {
-            p1.setFirstName("Henrietta");
-            Person changed = facade.editPerson(p1);
-            System.out.println("Firstname"+changed.getFirstName());
-            assertTrue(Objects.equals(changed.getId(), p1.getId()) && changed.getFirstName().equals("Henrietta"));
+            PersonDTO pdto1 = new PersonDTO(p1);
+            pdto1.setfName("Henrietta");
+            PersonDTO changed = facade.editPerson(pdto1);
+            System.out.println("Firstname" + changed.getfName());
+            assertTrue(changed.getfName().equals("Henrietta"));
         } catch (PersonNotFoundException ex) {
             ex.printStackTrace();
         }
-        }
-        
-    
+    }
+
 }

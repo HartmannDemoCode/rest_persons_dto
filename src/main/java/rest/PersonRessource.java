@@ -2,9 +2,11 @@ package rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import entities.Address;
 import entities.Person;
 import entities.dto.PersonDTO;
 import entities.dto.PersonsDTO;
+import exceptions.AddressNotFoundException;
 import exceptions.PersonNotFoundException;
 import facades.IPersonFacade;
 import utils.EMF_Creator;
@@ -27,77 +29,75 @@ import javax.ws.rs.core.Response;
 public class PersonRessource {
 
     private static final EntityManagerFactory EMF = EMF_Creator.createEntityManagerFactory(
-                "pu",
-                "jdbc:mysql://localhost:3307/startcode",
-                "dev",
-                "ax2",
-                EMF_Creator.Strategy.CREATE);
-    private static final IPersonFacade FACADE =  PersonFacade.getPersonFacade(EMF);
+            "pu",
+            "jdbc:mysql://localhost:3307/startcode",
+            "dev",
+            "ax2",
+            EMF_Creator.Strategy.CREATE);
+    private static final IPersonFacade FACADE = PersonFacade.getPersonFacade(EMF);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-            
+
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public String demo() {
         return "{\"msg\":\"Hello World\"}";
     }
-    
+
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getPerson(@PathParam("id") int id) throws PersonNotFoundException {
-        System.out.println("ID:"+id);
+        System.out.println("ID:" + id);
         System.out.println(FACADE.getPerson(id));
-        return Response.ok(GSON.toJson(new PersonDTO(FACADE.getPerson(id)))).build();
+        return Response.ok(GSON.toJson(FACADE.getPerson(id))).build();
     }
-    
+
     @GET
     @Path("/all")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getPersons() {
-        List<Person> persons = FACADE.getAllPersons();
-        PersonsDTO pd = new PersonsDTO(persons);
-        return Response.ok(GSON.toJson(pd)).build();
+        PersonsDTO persons = FACADE.getAllPersons();
+        return Response.ok(GSON.toJson(persons)).build();
     }
 //    
+
     @GET
     @Path("count")
     @Produces({MediaType.APPLICATION_JSON})
     public String getPersonCount() {
         long count = FACADE.count();
         //System.out.println("--------------->"+count);
-        return "{\"count\":"+count+"}";  //Done manually so no need for a DTO
+        return "{\"count\":" + count + "}";  //Done manually so no need for a DTO
     }
-    
+
     @POST
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
-    public Response createPerson(String content){
+    public Response createPerson(String content) {
         PersonDTO pd = GSON.fromJson(content, PersonDTO.class);
-        Person p = FACADE.addPerson(pd.getfName(), pd.getlName(), pd.getPhone());
-        return Response.ok(GSON.toJson(new PersonDTO(p))).build();
+        PersonDTO p = FACADE.addPerson(pd);
+        return Response.ok(GSON.toJson(p)).build();
     }
-    
+
     @PUT
     @Path("/{id}")
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
-    public Response editPerson(@PathParam("id") int id, String content) throws PersonNotFoundException{
-        System.out.println("CONTENT: "+content);
-        Person pd = GSON.fromJson(content, Person.class);
-        System.out.println("PERSON:"+pd);
+    public Response editPerson(@PathParam("id") int id, String content) throws PersonNotFoundException {
+        PersonDTO pd = GSON.fromJson(content, PersonDTO.class);
         pd.setId(id);
-        Person p = FACADE.editPerson(pd);
-        return Response.ok(GSON.toJson(new PersonDTO(p))).build();
+        PersonDTO pOut = FACADE.editPerson(pd);
+        System.out.println("PERSON................=>" + pOut);
+        return Response.ok(GSON.toJson(pOut)).build();
     }
-    
+
     @DELETE
     @Path("/{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response deletePerson(@PathParam("id") int id) throws PersonNotFoundException{
+    public Response deletePerson(@PathParam("id") int id) throws PersonNotFoundException {
 
-        Person p = FACADE.deletePerson(id);
-        return Response.ok(GSON.toJson(new PersonDTO(p))).build();
+        PersonDTO pdto = FACADE.deletePerson(id);
+        return Response.ok(GSON.toJson(pdto)).build();
     }
 
- 
 }

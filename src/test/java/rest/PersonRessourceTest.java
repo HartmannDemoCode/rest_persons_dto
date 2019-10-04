@@ -1,5 +1,6 @@
 package rest;
 
+import entities.Address;
 import entities.Person;
 import utils.EMF_Creator;
 import io.restassured.RestAssured;
@@ -12,7 +13,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import static org.hamcrest.Matchers.equalTo;
@@ -32,6 +32,7 @@ public class PersonRessourceTest {
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_URL = "http://localhost/api";
     private static Person p1, p2;
+    private static Address a1;
 
     static final URI BASE_URI = UriBuilder.fromUri(SERVER_URL).port(SERVER_PORT).build();
     private static HttpServer httpServer;
@@ -71,6 +72,9 @@ public class PersonRessourceTest {
         EntityManager em = emf.createEntityManager();
         p1 = new Person("Henning", "Bonnetsen", "536436");
         p2 = new Person("Helle", "Harsk", "213243");
+        a1 = new Address("Gammelkongevej 19", "1383", "Kbh K");
+        p1.setAddress(a1);
+        p2.setAddress(a1);
         try {
             em.getTransaction().begin();
             em.createNamedQuery("Person.deleteAllRows").executeUpdate();
