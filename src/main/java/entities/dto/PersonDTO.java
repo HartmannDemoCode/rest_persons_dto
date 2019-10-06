@@ -6,7 +6,10 @@
 package entities.dto;
 
 import entities.Address;
+import entities.Club;
 import entities.Person;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -21,6 +24,7 @@ public class PersonDTO {
     private String street;
     private String zip;
     private String city;
+    private List<String> clubs = new ArrayList();
 
     public PersonDTO(Person p) {
         this.fName = p.getFirstName();
@@ -33,6 +37,11 @@ public class PersonDTO {
             this.street = a.getStreet();
             this.zip = a.getZip();
             this.city = a.getCity();
+        }
+//       p.getClubs().forEach(club->clubs.add(club.getName()));
+//        List<Club> clubObjects = p.getClubs();
+        for (Club clubObject : p.getClubs()) {
+            clubs.add(clubObject.getName());
         }
     }
     
@@ -94,11 +103,19 @@ public class PersonDTO {
     public void setCity(String city) {
         this.city = city;
     }
-    
 
+    public List<String> getClubs() {
+        return clubs;
+    }
+
+    public void addClub(String club) {
+        this.clubs.add(club);
+    }
+    
     @Override
     public String toString() {
-        return "PersonDTO{" + "id=" + id + ", fName=" + fName + ", lName=" + lName + ", phone=" + phone + '}';
+        String clubsString = clubs.stream().reduce("", (partialString, element) -> partialString + element);
+        return "PersonDTO{" + "id=" + id + ", fName=" + fName + ", lName=" + lName + ", phone=" + phone + ", clubs: "+clubsString+'}';
     }
 
 }

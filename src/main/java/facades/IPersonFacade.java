@@ -4,12 +4,14 @@
  * and open the template in the editor.
  */
 package facades;
+import exceptions.ClubNotFoundException;
 import entities.Address;
-import entities.Person;
+import entities.dto.ClubDTO;
 import entities.dto.PersonDTO;
 import entities.dto.PersonsDTO;
 import exceptions.AddressNotFoundException;
 import exceptions.PersonNotFoundException;
+import java.util.List;
 
 /**
  *
@@ -32,7 +34,10 @@ import exceptions.PersonNotFoundException;
         PersonDTO editPerson(PersonDTO p) throws PersonNotFoundException;
         
         Address findAddress(String street, String zip, String city) throws AddressNotFoundException;
-
+        
+        ClubDTO getClub(Long id) throws ClubNotFoundException;
                 
+        List<ClubDTO> getAllClubs();
+        
         long count();
     }

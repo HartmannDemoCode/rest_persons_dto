@@ -1,10 +1,13 @@
 package facades;
 
 import entities.Address;
+import entities.Club;
 import entities.Person;
+import entities.dto.ClubDTO;
 import entities.dto.PersonDTO;
 import entities.dto.PersonsDTO;
 import exceptions.AddressNotFoundException;
+import exceptions.ClubNotFoundException;
 import exceptions.PersonNotFoundException;
 import java.util.List;
 import java.util.logging.Level;
@@ -107,28 +110,62 @@ public class PersonFacade implements IPersonFacade {
 
     @Override
     public PersonDTO editPerson(PersonDTO pdto) throws PersonNotFoundException {
+        if(pdto.getId()==0)
+            throw new PersonNotFoundException("Person id was not set");
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
-        Person p = new Person(pdto.getfName(), pdto.getlName(),pdto.getPhone());
-        p.setId(pdto.getId());
-        Address address = null;
-        try {
-            address = findAddress(pdto.getStreet(), pdto.getZip(), pdto.getCity());
-            address = em.merge(address);
-            p.setAddress(address);
-        } catch (AddressNotFoundException ex) {
-            address = new Address(pdto.getStreet(), pdto.getZip(), pdto.getCity());
-            em.persist(address);
-            p.setAddress(address);
+        
+        // Convert PersonDTO to Person
+        Person personFromDB = em.find(Person.class, pdto.getId());
+        if(personFromDB == null)
+             throw new PersonNotFoundException("Could not edit person. No person found with id " + pdto.getId());
+        
+        // Change all given fields from the PersonDTO
+        String fName = pdto.getfName();
+        String lName = pdto.getlName();
+        String street = pdto.getStreet();
+        String zip = pdto.getZip();
+        String city = pdto.getCity();
+        String phone = pdto.getPhone();
+
+        List<String> clubs = pdto.getClubs();
+        if(fName != null)
+            personFromDB.setfName(fName);
+        if(lName != null)
+            personFromDB.setlName(lName);
+        // Handle addresses
+        if(street != null && zip != null && city != null){
+            try {
+                Address address = findAddress(pdto.getStreet(), pdto.getZip(), pdto.getCity());
+                address = em.merge(address);
+                personFromDB.setAddress(address);
+            } catch (AddressNotFoundException ex) {
+                Address address = new Address(pdto.getStreet(), pdto.getZip(), pdto.getCity());
+                em.persist(address);
+                personFromDB.setAddress(address);
+            }
         }
-        try {
-            p = em.merge(p);
-        } catch (IllegalArgumentException e) {
-            throw new PersonNotFoundException("Could not edit person. No person found with id " + p.getId());
+        
+        // Handle clubs
+        if(clubs != null){
+            clubs.forEach(clubName->{
+                Club club = null;
+                try {
+                     club = findClubByName(clubName);
+                     club = em.merge(club);
+                } catch (NoResultException e) {
+                    club = new Club(clubName);
+                    em.persist(club);
+                }
+                if(!personFromDB.getClubs().contains(club))
+                    personFromDB.addClub(club);
+            });
         }
+        Person mergedPerson = em.merge(personFromDB);
         em.getTransaction().commit();
         em.close();
-        return new PersonDTO(p);
+        System.out.println("mergedPerson from editPerson():"+mergedPerson);
+        return new PersonDTO(mergedPerson);
     }
 
     @Override
@@ -157,6 +194,16 @@ public class PersonFacade implements IPersonFacade {
         return address;
     }
 
+    @Override
+    public ClubDTO getClub(Long id) throws ClubNotFoundException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    public List<ClubDTO> getAllClubs() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     public static void main(String[] args) {
         IPersonFacade pf = getPersonFacade(EMF_Creator.createEntityManagerFactory(
                 "pu",
@@ -164,16 +211,28 @@ public class PersonFacade implements IPersonFacade {
                 "dev",
                 "ax2",
                 EMF_Creator.Strategy.CREATE));
-//        Person p = pf.addPerson("Henrik", "Hamsun", "40404050", new Address("Rolighedsvej 4", "2100", "Copenhagen East"));
+        PersonDTO p = pf.addPerson("Henrik", "Hamsun", "40404050", "Rolighedsvej 4", "2100", "Copenhagen East");
+        pf.getAllPersons().getAll().forEach(System.out::println);
+        p.setfName("Hansine");
+        p.addClub("sailing");
+        try {
+            pf.editPerson(p);
 //        pf.getAllPersons().forEach(System.out::println);
-//        p.setFirstName("Hansine");
-//        pf.editPerson(p);
-//        pf.getAllPersons().forEach(System.out::println);
-           
+        } catch (PersonNotFoundException ex) {
+            ex.printStackTrace();
+        } 
     }
 
 
     private boolean livesAloneAtAddress(Address a){
         return a != null && a.getPersons().size() == 1;
+    }
+    private Club findClubByName(String clubName){
+        EntityManager em = getEntityManager();
+        TypedQuery<Club> tq = em.createQuery("SELECT c FROM Club c WHERE c.name = :name", Club.class);
+        tq.setParameter("name", clubName);
+        Club club = tq.getSingleResult();
+        em.close();
+        return club;
     }
 }

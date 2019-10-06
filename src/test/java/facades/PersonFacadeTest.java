@@ -139,9 +139,13 @@ public class PersonFacadeTest {
         try {
             PersonDTO pdto1 = new PersonDTO(p1);
             pdto1.setfName("Henrietta");
+            pdto1.addClub("sailing");
+            System.out.println("NOT YET CHANGED:"+pdto1);
             PersonDTO changed = facade.editPerson(pdto1);
-            System.out.println("Firstname" + changed.getfName());
+            
+            System.out.println("CHANGED" + changed);
             assertTrue(changed.getfName().equals("Henrietta"));
+            assertTrue(changed.getClubs().contains("sailing"));
         } catch (PersonNotFoundException ex) {
             ex.printStackTrace();
         }
