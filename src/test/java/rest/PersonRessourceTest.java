@@ -168,6 +168,18 @@ public class PersonRessourceTest {
         assertTrue(pdto.getId() == p1.getId());
     }
     @Test
+    public void testEditPersonWithAddressAndClubs() throws Exception {
+
+        PersonDTO pdto = given()
+            .contentType(ContentType.JSON)
+            .request().body("{\"fName\":\"Kalle\",\"lName\": \"Kistrup\",\"phone\": \"40404054\"}")
+            .put("/person/"+p1.getId())
+            .then().statusCode(200)
+            .body("fName", is("Kalle"))
+            .extract().response().as(PersonDTO.class);
+        assertTrue(pdto.getId() == p1.getId());
+    }
+    @Test
     public void testDeletePerson() throws Exception {
 
         given()

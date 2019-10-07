@@ -10,8 +10,6 @@ import exceptions.AddressNotFoundException;
 import exceptions.ClubNotFoundException;
 import exceptions.PersonNotFoundException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -19,10 +17,6 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
 import utils.EMF_Creator;
 
-/**
- *
- * Rename Class to a relevant name Add add relevant facade methods
- */
 public class PersonFacade implements IPersonFacade {
 
     private static IPersonFacade instance;
@@ -127,7 +121,6 @@ public class PersonFacade implements IPersonFacade {
         String zip = pdto.getZip();
         String city = pdto.getCity();
         String phone = pdto.getPhone();
-
         List<String> clubs = pdto.getClubs();
         if(fName != null)
             personFromDB.setfName(fName);
