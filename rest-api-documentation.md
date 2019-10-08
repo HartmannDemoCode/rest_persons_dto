@@ -52,8 +52,8 @@
 @Path("person")
 public class PersonRessource {
 ```
-as seen above the @OpenAPIDefinition annotationen sits right on top of the class keyword in the java file and descripes the general stuff about this ressource.
-7. Create a new DTO class and annotate each field (except the id field) with an annotation like: `@Schema(required = true,example = "Forrest Gump")` or `@Schema(required = true,example="Robert Zemeckis")` or `@Schema(required = true,example = "1994")` or `@Schema(example="[\"Tom Hanks\",\"Robin Wright\"]")`
+as seen above the @OpenAPIDefinition annotationen sits right on top of the class keyword in the java file and descripes the general stuff about this ressource.  
+7. Create a new DTO class and annotate each field (except the id field) with an annotation like: `@Schema(required = true,example = "Forrest Gump")` or `@Schema(required = true,example="Robert Zemeckis")` or `@Schema(required = true,example = "1994")` or `@Schema(example="[\"Tom Hanks\",\"Robin Wright\"]")`  
 8. In POST and PUT method annotate for the request body like:
 ```java
 public Response createPerson(
