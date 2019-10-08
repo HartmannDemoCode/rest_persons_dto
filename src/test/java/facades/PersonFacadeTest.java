@@ -1,17 +1,19 @@
 package facades;
 
+import entities.Address;
 import entities.Person;
-import facades.IPersonFacade;
+import entities.dto.PersonDTO;
+import entities.dto.PersonsDTO;
+import exceptions.AddressNotFoundException;
 import utils.EMF_Creator;
 import exceptions.PersonNotFoundException;
-import java.util.List;
-import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,8 +28,8 @@ public class PersonFacadeTest {
 
     private static EntityManagerFactory emf;
     private static IPersonFacade facade;
-    private Person p1;
-    private Person p2;
+    private Person p1, p2;
+    private Address a1, a2;
 
     public PersonFacadeTest() {
     }
@@ -51,8 +53,8 @@ public class PersonFacadeTest {
      */
     @BeforeAll
     public static void setUpClassV2() {
-       emf = EMF_Creator.createEntityManagerFactory(DbSelector.TEST,Strategy.DROP_AND_CREATE);
-       facade = PersonFacade.getPersonFacade(emf);
+        emf = EMF_Creator.createEntityManagerFactory(DbSelector.TEST, Strategy.DROP_AND_CREATE);
+        facade = PersonFacade.getPersonFacade(emf);
     }
 
     @AfterAll
@@ -61,15 +63,17 @@ public class PersonFacadeTest {
     }
 
     // Setup the DataBase in a known state BEFORE EACH TEST
-    //TODO -- Make sure to change the script below to use YOUR OWN entity class
     @BeforeEach
     public void setUp() {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
             em.createNamedQuery("Person.deleteAllRows").executeUpdate();
-            p1 = new Person("Henning", "Bonnetsen","536436");
-            p2 = new Person("Helle", "Harsk","213243");
+            em.createNamedQuery("Address.deleteAllRows").executeUpdate();
+            a1 = new Address("Rolighedsvej 5", "2100", "Cph E");
+            a2 = new Address("Rolighedsvej 6", "2100", "Cph E");
+            p1 = new Person("Henning", "Bonnetsen", "536436", a1);
+            p2 = new Person("Helle", "Harsk", "213243", a2);
             em.persist(p1);
             em.persist(p2);
 
@@ -89,53 +93,61 @@ public class PersonFacadeTest {
     public void testCount() {
         assertEquals(2, facade.count(), "Expects two rows in the database");
     }
-    
+
     @Test
-    public void addPersonTest(){
-        Person p = facade.addPerson("Janni",  "Spice",  "123456");
-        assertTrue(p.getId() != null);
+    public void addPersonTest() {
+        Address address = new Address("Rolighedsvej 3", "2100", "Copenhagen East");
+        PersonDTO p = facade.addPerson("Janni", "Spice", "123456", "Rolighedsvej 3", "2100", "Copenhagen East");
+        assertTrue(p.getId() != 0);
     }
-        
-        @Test
-        public void deletePersonTest(){
+
+    @Test
+    public void deletePersonTest() {
         try {
-            Person p = facade.deletePerson(p1.getId());
+            PersonDTO p = facade.deletePerson(p1.getId());
             assertThat(p, Matchers.hasProperty("id"));
+            assertThrows(AddressNotFoundException.class,()->{facade.findAddress("Rolighedsvej 5", "2100", "Cph E");});
         } catch (PersonNotFoundException ex) {
             ex.printStackTrace();
-        }
-
-        }
-
-        @Test
-        public void getPersonTest(){
-        try {
-            Person p = facade.getPerson(p1.getId());
-            assertTrue(p.getFirstName().equals("Henning"));
-        } catch (PersonNotFoundException ex) {
-            ex.printStackTrace();
-        }
-        }
-//        
-//
-        @Test
-        public void getAllPersonsTest(){
-            List<Person> persons = facade.getAllPersons();
-            assertTrue(persons.size() == 2);
-        }
-//        
-//
-        @Test
-        public void editPersonTest(){
-        try {
-            p1.setFirstName("Henrietta");
-            Person changed = facade.editPerson(p1);
-            System.out.println("Firstname"+changed.getFirstName());
-            assertTrue(Objects.equals(changed.getId(), p1.getId()) && changed.getFirstName().equals("Henrietta"));
-        } catch (PersonNotFoundException ex) {
-            ex.printStackTrace();
-        }
         }
         
-    
+    }
+
+    @Test
+    public void getPersonTest() {
+        try {
+            PersonDTO p = facade.getPerson(p1.getId());
+            assertTrue(p.getfName().equals("Henning"));
+        } catch (PersonNotFoundException ex) {
+            ex.printStackTrace();
+        }
+    }
+//        
+//
+
+    @Test
+    public void getAllPersonsTest() {
+        PersonsDTO persons = facade.getAllPersons();
+        assertTrue(persons.getAll().size() == 2);
+    }
+//        
+//
+
+    @Test
+    public void editPersonTest() {
+        try {
+            PersonDTO pdto1 = new PersonDTO(p1);
+            pdto1.setfName("Henrietta");
+            pdto1.addClub("sailing");
+            System.out.println("NOT YET CHANGED:"+pdto1);
+            PersonDTO changed = facade.editPerson(pdto1);
+            
+            System.out.println("CHANGED" + changed);
+            assertTrue(changed.getfName().equals("Henrietta"));
+            assertTrue(changed.getClubs().contains("sailing"));
+        } catch (PersonNotFoundException ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }

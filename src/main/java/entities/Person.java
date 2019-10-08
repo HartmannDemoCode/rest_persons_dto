@@ -1,11 +1,18 @@
 package entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
@@ -21,29 +28,69 @@ public class Person implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String fName, lName, phone;
     @Temporal(javax.persistence.TemporalType.DATE)
-    private Date created;
+    private Date created = new Date() ;
     @Temporal(javax.persistence.TemporalType.DATE)
-    private Date lastEdited;
+    private Date lastEdited = new Date();
+    
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "address_id")
+    private Address address;
+    
+    @ManyToMany(mappedBy = "persons") //mappedBy on owning side only
+    private List<Club> clubs = new ArrayList();
+
+    public Person(String firstName, String lastName, String phone, Address a) {
+        this.fName = firstName;
+        this.lName = lastName;
+        this.phone = phone;
+        this.address = a;
+        if(!a.getPersons().contains(this))
+            a.addPerson(this);
+    }
 
     public Person(String firstName, String lastName, String phone) {
         this.fName = firstName;
         this.lName = lastName;
         this.phone = phone;
-        this.created = new Date();
-        this.lastEdited = new Date();
-    }
-
-    public Person() {
     }
     
-    public Integer getId() {
+    public Person() {
+    }
+
+    public String getfName() {
+        return fName;
+    }
+
+    public void setfName(String fName) {
+        this.fName = fName;
+    }
+
+    public String getlName() {
+        return lName;
+    }
+
+    public void setlName(String lName) {
+        this.lName = lName;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+        if(!address.getPersons().contains(this))
+            address.addPerson(this);
+    }
+    
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -87,10 +134,24 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
-        return "Person{" + "id=" + id + ", firstName=" + fName + ", lastName=" + lName + ", phone=" + phone + ", created=" + created + ", lastEdited=" + lastEdited + '}';
+//        String clubsString = clubs.stream()
+//                .map(element->element.getName())
+//                .reduce("", (partialString, element) -> partialString + element);
+        String clubsString = "";
+        for (Club club : clubs) {
+            clubsString += club.getName();
+        }
+        return "Person{" + "id=" + id + ", firstName=" + fName + ", lastName=" + lName + ", phone=" + phone + ", created=" + created + ", lastEdited=" + lastEdited +"clubs: "+clubsString+ '}';
     }
 
-    
-        
-    
+    public List<Club> getClubs() {
+        return clubs;
+    }
+
+    public void addClub(Club club) {
+        this.clubs.add(club);
+        this.lastEdited = new Date();
+        if(!club.getPersons().contains(this))
+            club.addPerson(this);
+    }
 }
