@@ -2,3 +2,8 @@
 **/nb-configuration.xml
 
 /nbproject/**/target/
+.classpath
+.factorypath
+.idea/
+.project
+.settings/

@@ -10,27 +10,39 @@ import entities.Club;
 import entities.Person;
 import java.util.ArrayList;
 import java.util.List;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  *
  * @author tha
  */
+@Schema(name = "Person")
 public class PersonDTO {
 
     private long id;
+    @Schema(required = true, example = "Henning")
     private String fName;
+    @Schema(required = true,example = "Jensen")
     private String lName;
+    @Schema(required = true,example = "+4540980480")
     private String phone;
+    @Schema(required = true,example = "Rolighedsvej 3")
     private String street;
+    @Schema(required = true,example = "2100")
     private String zip;
+    @Schema(required = true,example = "Kbh Ø")
     private String city;
+    @Schema(required = true,example = "\"clubs\":[\"sailing\"]")
     private List<String> clubs = new ArrayList();
 
     public PersonDTO(Person p) {
         this.fName = p.getFirstName();
         this.lName = p.getLastName();
         this.phone = p.getPhone();
-        
+
         this.id = p.getId();
         Address a = p.getAddress();
         if (a != null) {
@@ -44,7 +56,7 @@ public class PersonDTO {
             clubs.add(clubObject.getName());
         }
     }
-    
+
     public PersonDTO() {
     }
 
@@ -111,7 +123,7 @@ public class PersonDTO {
     public void addClub(String club) {
         this.clubs.add(club);
     }
-    
+
     @Override
     public String toString() {
         String clubsString = clubs.stream().reduce("", (partialString, element) -> partialString + element);
