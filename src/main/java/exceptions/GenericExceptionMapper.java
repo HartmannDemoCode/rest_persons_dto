@@ -27,15 +27,9 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
     
     @Override
     public Response toResponse(Throwable ex) {
-        Logger.getLogger(GenericExceptionMapper.class.getName()).log(Level.SEVERE, null, ex);
         Response.StatusType type = getStatusType(ex);
-        ExceptionDTO err;
-        if (ex instanceof WebApplicationException) {
-            err = new ExceptionDTO(type.getStatusCode(), ((WebApplicationException) ex).getMessage());
-        } else {
-
-            err = new ExceptionDTO(type.getStatusCode(), type.getReasonPhrase());
-        }
+        Logger.getLogger(GenericExceptionMapper.class.getName()).log(Level.SEVERE, null, ex);
+        ExceptionDTO err = new ExceptionDTO(type.getStatusCode(),type.getReasonPhrase());
         return Response.status(type.getStatusCode())
                 .entity(gson.toJson(err))
                 .type(MediaType.APPLICATION_JSON).

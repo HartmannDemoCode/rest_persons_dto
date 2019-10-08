@@ -6,8 +6,6 @@
 package entities.dto;
 
 import entities.Person;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,16 +14,7 @@ import java.util.List;
  * @author tha
  */
 public class PersonsDTO {
-    @Schema(required = true,example = "[{\n" +
-            "            \"id\": 1,\n" +
-            "            \"fName\": \"Henrik\",\n" +
-            "            \"lName\": \"Hamsun\",\n" +
-            "            \"phone\": \"40404050\",\n" +
-            "            \"street\": \"Rolighedsvej 4\",\n" +
-            "            \"zip\": \"2100\",\n" +
-            "            \"city\": \"Copenhagen East\",\n" +
-            "            \"clubs\": []\n" +
-            "        },...],")
+    
     List<PersonDTO> all = new ArrayList();
 
     public PersonsDTO(List<Person> personEntities) {
