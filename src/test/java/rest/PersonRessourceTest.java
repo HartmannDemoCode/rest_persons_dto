@@ -1,8 +1,6 @@
 package rest;
 
-import entities.Address;
 import entities.Person;
-import entities.dto.PersonDTO;
 import utils.EMF_Creator;
 import io.restassured.RestAssured;
 import static io.restassured.RestAssured.given;
@@ -14,13 +12,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +32,6 @@ public class PersonRessourceTest {
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_URL = "http://localhost/api";
     private static Person p1, p2;
-    private static Address a1;
 
     static final URI BASE_URI = UriBuilder.fromUri(SERVER_URL).port(SERVER_PORT).build();
     private static HttpServer httpServer;
@@ -74,9 +71,6 @@ public class PersonRessourceTest {
         EntityManager em = emf.createEntityManager();
         p1 = new Person("Henning", "Bonnetsen", "536436");
         p2 = new Person("Helle", "Harsk", "213243");
-        a1 = new Address("Gammelkongevej 19", "1383", "Kbh K");
-        p1.setAddress(a1);
-        p2.setAddress(a1);
         try {
             em.getTransaction().begin();
             em.createNamedQuery("Person.deleteAllRows").executeUpdate();
@@ -126,7 +120,7 @@ public class PersonRessourceTest {
 
     @Test
     public void testGetPersonById() throws Exception {
-        Long id = p1.getId();
+        int id = p1.getId();
         given()
                 .contentType("application/json")
                 .get("/person/"+id).then()
@@ -158,26 +152,12 @@ public class PersonRessourceTest {
     @Test
     public void testEditPerson() throws Exception {
 
-        PersonDTO pdto = given()
+        given()
             .contentType(ContentType.JSON)
             .request().body("{\"fName\":\"Kalle\",\"lName\": \"Kistrup\",\"phone\": \"40404054\"}")
             .put("/person/"+p1.getId())
             .then().statusCode(200)
-            .body("fName", is("Kalle"))
-            .extract().response().as(PersonDTO.class);
-        assertTrue(pdto.getId() == p1.getId());
-    }
-    @Test
-    public void testEditPersonWithAddressAndClubs() throws Exception {
-
-        PersonDTO pdto = given()
-            .contentType(ContentType.JSON)
-            .request().body("{\"fName\":\"Kalle\",\"lName\": \"Kistrup\",\"phone\": \"40404054\"}")
-            .put("/person/"+p1.getId())
-            .then().statusCode(200)
-            .body("fName", is("Kalle"))
-            .extract().response().as(PersonDTO.class);
-        assertTrue(pdto.getId() == p1.getId());
+            .body("fName", is("Kalle"));
     }
     @Test
     public void testDeletePerson() throws Exception {
